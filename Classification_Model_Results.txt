@@ -1,1 +1,4 @@
 Maximum accuracy from Logistic Regression: 0.8036310742376899
+Maximum Accuracy from Naive Bayes: 0.8112811119491434
+Maximum Accuracy from Linear SVM: 0.8433358474302338
+Maximum Accuracy from Multilayer Perceptron: 0.8112811119491434
