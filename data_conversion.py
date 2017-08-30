@@ -6,7 +6,7 @@ outputFile = open('Hotel_Reviews_clean.csv', 'w')
 numberOfInputs = 0
 numberOfOutputs = 0
 
-fieldnames = ['hotel_address', 'hotel_name', 'reviewer_origin', 'number_user_reviews', 'score', 'hotel_latitude', 'hotel_longitude', 'review_text']
+fieldnames = ['hotel_address', 'hotel_name', 'reviewer_origin', 'number_user_reviews', 'score', 'hotel_latitude', 'hotel_longitude', 'review_text', 'sentiment']
 
 reader = csv.DictReader(inputFile)
 writer = csv.DictWriter(outputFile, fieldnames=fieldnames)
@@ -34,8 +34,15 @@ for row in reader:
         positiveText = row["Positive_Review"]
     if positiveText + negativeText != "":
         newRow['review_text'] = (positiveText + negativeText)
+        if float(newRow['score']) > 5.0:
+            print('positive')
+            newRow['sentiment'] = 1
+        else:
+            print('negative')
+            newRow['sentiment'] = 0
         writer.writerow(newRow)
         numberOfOutputs += 1
+
         print('Wrote new row')
 
 print('Done')
