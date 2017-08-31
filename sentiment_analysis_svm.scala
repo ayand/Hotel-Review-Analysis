@@ -50,3 +50,5 @@ val svm = new LinearSVC().setMaxIter(10).setRegParam(0.0001)
 
   println("Accuracy:")
   println(metrics.accuracy)
+
+  model.write.overwrite.save("sentiment_analysis_svm_model")
