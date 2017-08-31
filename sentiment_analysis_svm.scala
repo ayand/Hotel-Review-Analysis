@@ -27,7 +27,7 @@ val Array(training, test) = balancedData.randomSplit(Array(0.7, 0.3), seed = 123
 
 val tokenizer = new Tokenizer().setInputCol("review_text").setOutputCol("words")
 
-val hashingTF = new HashingTF().setInputCol("words").setOutputCol("rawFeatures").setNumFeatures(80000)
+val hashingTF = new HashingTF().setInputCol("words").setOutputCol("rawFeatures").setNumFeatures(30000)
 
 val idf = new IDF().setInputCol("rawFeatures").setOutputCol("features")
 
