@@ -6,11 +6,20 @@ outputFile = open('Hotel_Reviews_clean.csv', 'w')
 numberOfInputs = 0
 numberOfOutputs = 0
 
-fieldnames = ['hotel_address', 'hotel_name', 'reviewer_origin', 'number_user_reviews', 'score', 'hotel_latitude', 'hotel_longitude', 'review_text', 'sentiment']
+fieldnames = ['hotel_address', 'hotel_name', 'reviewer_origin', 'number_user_reviews', 'score', 'hotel_latitude', 'hotel_longitude', 'review_text', 'sentiment', 'visit_length', 'trip_type', 'visitor_type']
 
 reader = csv.DictReader(inputFile)
 writer = csv.DictWriter(outputFile, fieldnames=fieldnames)
 writer.writeheader()
+
+distinctTags = set()
+
+coupleCount = 0
+olderChildrenCount = 0
+youngChildrenCount = 0
+groupCount = 0
+soloTravelerCount = 0
+travelersFriendsCount = 0
 
 for row in reader:
     numberOfInputs += 1
@@ -35,17 +44,67 @@ for row in reader:
     if positiveText + negativeText != "":
         newRow['review_text'] = (positiveText + negativeText)
         if float(newRow['score']) > 5.0:
-            print('positive')
+            #print('positive')
             newRow['sentiment'] = 1
         else:
-            print('negative')
+            #print('negative')
             newRow['sentiment'] = 0
         writer.writerow(newRow)
         numberOfOutputs += 1
+    tags = row["Tags"].replace("[","").replace("]", "").replace("'", "")
+    tagsSplit = tags.split(",")
+    for tag in tagsSplit:
+        distinctTags.add(tag.strip())
+        if "Stayed" in tag:
+            #distinctTags.add(tag.strip())
+            components = tag.strip().split(" ")
+            days = components[1]
+            daysNum = int(days)
+            newRow["visit_length"] = daysNum
+        else:
+            newRow["visit_length"] = ""
+        if "Trip" in tag or "trip" in tag:
+            if tag.strip() in ["Business trip", "Leisure trip"]:
+                tripType = tag.strip()
+                if tripType == "Business trip":
+                    newRow["trip_type"] = "Business"
+                else:
+                    newRow["trip_type"] = "Leisure"
+            else:
+                newRow["trip_type"] = ""
+        else:
+            newRow["trip_type"] = ""
+        if tag.strip() in ["Couple", "Family with older children", "Family with young children", "Group", "Solo traveler", "Travelers with friends"]:
+            #print(tag.split())
+            partyType = tag.strip()
+            newRow['visitor_type'] = partyType
+            if partyType == "Couple":
+                coupleCount += 1
+            elif partyType == "Family with older children":
+                olderChildrenCount += 1
+            elif partyType == "Family with young children":
+                youngChildrenCount += 1
+            elif partyType == "Group":
+                groupCount += 1
+            elif partyType == "Solo traveler":
+                soloTravelerCount += 1
+            elif partyType == "Travelers with friends":
+                travelersFriendsCount += 1
+        else:
+            newRow['visitor_type'] = ""
 
-        print('Wrote new row')
+
+        #print('Wrote new row')
 
 print('Done')
+
+print("Number of couples: " + str(coupleCount))
+print("Number of families with older children: " + str(olderChildrenCount))
+print("Number of families with young children: " + str(youngChildrenCount))
+print("Number of groups: " + str(groupCount))
+print("Number of solo travelers: " + str(soloTravelerCount))
+print("Number of travelers with friends: " + str(travelersFriendsCount))
+
 outputFile.close()
 inputFile.close()
 
