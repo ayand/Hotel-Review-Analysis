@@ -49,49 +49,51 @@ for row in reader:
         else:
             #print('negative')
             newRow['sentiment'] = 0
+        tags = row["Tags"].replace("[","").replace("]", "").replace("'", "")
+        tagsSplit = tags.split(",")
+        for tag in tagsSplit:
+            distinctTags.add(tag.strip())
+            if "Stayed" in tag:
+                #distinctTags.add(tag.strip())
+                components = tag.strip().split(" ")
+                days = components[1]
+                daysNum = int(days)
+                newRow["visit_length"] = daysNum
+            elif "visit_length" not in newRow:
+                newRow["visit_length"] = ""
+            if "Trip" in tag or "trip" in tag:
+                if tag.strip() in ["Business trip", "Leisure trip"]:
+                    #print("Found trip type")
+                    tripType = tag.strip()
+                    if tripType == "Business trip":
+                        newRow["trip_type"] = "Business"
+                    else:
+                        newRow["trip_type"] = "Leisure"
+                elif "trip_type" not in newRow:
+                    newRow["trip_type"] = ""
+            elif "trip_type" not in newRow:
+                newRow["trip_type"] = ""
+            if tag.strip() in ["Couple", "Family with older children", "Family with young children", "Group", "Solo traveler", "Travelers with friends"]:
+                #print(tag.split())
+                partyType = tag.strip()
+                newRow['visitor_type'] = partyType
+                if partyType == "Couple":
+                    coupleCount += 1
+                elif partyType == "Family with older children":
+                    olderChildrenCount += 1
+                elif partyType == "Family with young children":
+                    youngChildrenCount += 1
+                elif partyType == "Group":
+                    groupCount += 1
+                elif partyType == "Solo traveler":
+                    soloTravelerCount += 1
+                elif partyType == "Travelers with friends":
+                    travelersFriendsCount += 1
+            elif "visitor_type" not in newRow:
+                newRow['visitor_type'] = ""
         writer.writerow(newRow)
         numberOfOutputs += 1
-    tags = row["Tags"].replace("[","").replace("]", "").replace("'", "")
-    tagsSplit = tags.split(",")
-    for tag in tagsSplit:
-        distinctTags.add(tag.strip())
-        if "Stayed" in tag:
-            #distinctTags.add(tag.strip())
-            components = tag.strip().split(" ")
-            days = components[1]
-            daysNum = int(days)
-            newRow["visit_length"] = daysNum
-        else:
-            newRow["visit_length"] = ""
-        if "Trip" in tag or "trip" in tag:
-            if tag.strip() in ["Business trip", "Leisure trip"]:
-                tripType = tag.strip()
-                if tripType == "Business trip":
-                    newRow["trip_type"] = "Business"
-                else:
-                    newRow["trip_type"] = "Leisure"
-            else:
-                newRow["trip_type"] = ""
-        else:
-            newRow["trip_type"] = ""
-        if tag.strip() in ["Couple", "Family with older children", "Family with young children", "Group", "Solo traveler", "Travelers with friends"]:
-            #print(tag.split())
-            partyType = tag.strip()
-            newRow['visitor_type'] = partyType
-            if partyType == "Couple":
-                coupleCount += 1
-            elif partyType == "Family with older children":
-                olderChildrenCount += 1
-            elif partyType == "Family with young children":
-                youngChildrenCount += 1
-            elif partyType == "Group":
-                groupCount += 1
-            elif partyType == "Solo traveler":
-                soloTravelerCount += 1
-            elif partyType == "Travelers with friends":
-                travelersFriendsCount += 1
-        else:
-            newRow['visitor_type'] = ""
+
 
 
         #print('Wrote new row')
