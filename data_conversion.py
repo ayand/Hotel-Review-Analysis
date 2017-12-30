@@ -6,7 +6,7 @@ outputFile = open('Hotel_Reviews_clean.csv', 'w')
 numberOfInputs = 0
 numberOfOutputs = 0
 
-fieldnames = ['hotel_address', 'hotel_name', 'reviewer_origin', 'number_user_reviews', 'score', 'hotel_latitude', 'hotel_longitude', 'review_text', 'sentiment', 'visit_length', 'trip_type', 'visitor_type']
+fieldnames = ['hotel_address', 'hotel_name', 'reviewer_origin', 'number_user_reviews', 'score', 'hotel_latitude', 'hotel_longitude', 'review_text', 'sentiment', 'visit_length', 'trip_type', 'visitor_type', 'city']
 
 reader = csv.DictReader(inputFile)
 writer = csv.DictWriter(outputFile, fieldnames=fieldnames)
@@ -43,7 +43,7 @@ for row in reader:
         positiveText = row["Positive_Review"]
     if positiveText + negativeText != "":
         newRow['review_text'] = (positiveText + negativeText)
-        if float(newRow['score']) > 5.0:
+        if float(newRow['score']) >= 6.0:
             #print('positive')
             newRow['sentiment'] = 1
         else:
@@ -91,21 +91,20 @@ for row in reader:
                     travelersFriendsCount += 1
             elif "visitor_type" not in newRow:
                 newRow['visitor_type'] = ""
+        if "Amsterdam" in row["Hotel_Address"]:
+            newRow['city'] = "Amsterdam"
+        elif "London" in row["Hotel_Address"]:
+            newRow['city'] = "London"
+        elif "Barcelona" in row["Hotel_Address"]:
+            newRow['city'] = "Barcelona"
+        elif "Vienna" in row["Hotel_Address"]:
+            newRow['city'] = "Vienna"
+        elif "Milan" in row["Hotel_Address"]:
+            newRow['city'] = "Milan"
+        else:
+            newRow['city'] = "Paris"
         writer.writerow(newRow)
         numberOfOutputs += 1
-
-
-
-        #print('Wrote new row')
-
-print('Done')
-
-print("Number of couples: " + str(coupleCount))
-print("Number of families with older children: " + str(olderChildrenCount))
-print("Number of families with young children: " + str(youngChildrenCount))
-print("Number of groups: " + str(groupCount))
-print("Number of solo travelers: " + str(soloTravelerCount))
-print("Number of travelers with friends: " + str(travelersFriendsCount))
 
 outputFile.close()
 inputFile.close()

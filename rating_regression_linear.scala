@@ -12,10 +12,10 @@ val spark = SparkSession.builder().getOrCreate()
 
 val data = spark.read.option("header", "true").option("inferSchema", "true").format("csv").load("Hotel_Reviews_clean.csv")
 
-val sentimentInfo = data.select(data("sentiment").as("label"), $"review_text")
+val sentimentInfo = data.select(data("score").as("label"), $"review_text")
 
-val positiveReviews = sentimentInfo.filter("label = 1")
-val negativeReviews = sentimentInfo.filter("label = 0")
+val positiveReviews = sentimentInfo.filter("score > 5.0")
+val negativeReviews = sentimentInfo.filter("score <= 5.0")
 val countNegative = negativeReviews.count().toInt
 
 val balancedData = positiveReviews.limit(countNegative).unionAll(negativeReviews)
@@ -26,15 +26,18 @@ val hashingTF = new HashingTF().setInputCol("words").setOutputCol("rawFeatures")
 
 val idf = new IDF().setInputCol("rawFeatures").setOutputCol("features")
 
-val lr = new LinearRegression().setMaxIter(100).setRegParam(0.3).setElasticNetParam(0.8)
+val lr = new LinearRegression().setMaxIter(1000).setRegParam(0.00001).setElasticNetParam(0.0008)
 
 val pipeline = new Pipeline().setStages(Array(tokenizer, hashingTF, idf, lr))
 
-val lrModel = pipeline.fit(balancedData)
+val wordPipeline = pipeline.fit(balancedData)
+
+val transformedWords = wordPipeline.transform(balancedData)
+
+val inputAndOutput = transformedWords.select(transformedWords("features"), transformedWords("label"))
+
+val lrModel = lr.fit(inputAndOutput)
 
 val trainingSummary = lrModel.summary
-println(s"numIterations: ${trainingSummary.totalIterations}")
-println(s"objectiveHistory: [${trainingSummary.objectiveHistory.mkString(",")}]")
-trainingSummary.residuals.show()
 println(s"RMSE: ${trainingSummary.rootMeanSquaredError}")
 println(s"r2: ${trainingSummary.r2}")
